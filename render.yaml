@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: city-bites-ordering
+    env: node
+    buildCommand: ""
+    startCommand: node server.mjs
+    plan: free
+    envVars:
+      - key: HOST
+        value: 0.0.0.0

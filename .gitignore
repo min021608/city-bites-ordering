@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+data/
+city-bites-public.zip
+city-bites-node-app.zip
+stock-dashboard/

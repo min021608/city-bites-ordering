@@ -8,7 +8,8 @@ const ROOT = fileURLToPath(new URL(".", import.meta.url));
 const PUBLIC_DIR = join(ROOT, "public");
 const DATA_DIR = join(ROOT, "data");
 const PORT = Number(process.env.PORT) || 3000;
-const HOSTS = (process.env.HOST || "127.0.0.1,::1")
+const DEFAULT_HOSTS = process.env.PORT ? "0.0.0.0" : "127.0.0.1,::1";
+const HOSTS = (process.env.HOST || DEFAULT_HOSTS)
   .split(",")
   .map((host) => host.trim())
   .filter(Boolean);

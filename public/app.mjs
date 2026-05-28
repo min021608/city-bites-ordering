@@ -15,6 +15,7 @@ const state = {
   orders: Array.isArray(savedOrders) ? savedOrders : [],
   category: "全部",
   search: "",
+  statsScope: "all",
   statsDay: todayKey()
 };
 const menuGrid = document.querySelector("#menu-grid");
@@ -174,14 +175,9 @@ function renderCart() {
   document.querySelector("#cart-count").textContent = `${order.count} 項`;
   document.querySelector("#top-cart-count").textContent = order.count;
   document.querySelector("#subtotal").textContent = formatMoney(order.subtotal);
-  document.querySelector("#discount").textContent = `- ${formatMoney(order.discount)}`;
   document.querySelector("#total").textContent = formatMoney(order.total);
   document.querySelector("#dialog-total").textContent = formatMoney(order.total);
   document.querySelector("#checkout").disabled = !order.items.length;
-  const gap = Math.max(0, 500 - order.subtotal);
-  document.querySelector("#promotion").textContent = gap > 0
-    ? `再點 ${formatMoney(gap)}，即可折抵 NT$50`
-    : "已享滿額折抵 NT$50";
 }
 
 function renderFeatured() {
@@ -256,18 +252,25 @@ async function saveEditedMenu() {
 }
 
 function renderStats() {
+  const isAllStats = state.statsScope === "all";
   const selectedDay = state.statsDay || todayKey();
-  const report = summarizeOrders(state.orders, selectedDay);
+  const report = summarizeOrders(state.orders, isAllStats ? null : selectedDay);
+  document.querySelector("#stats-scope").value = state.statsScope;
   document.querySelector("#stats-day").value = selectedDay;
+  document.querySelector("#stats-day-field").hidden = isAllStats;
+  document.querySelector("#stats-orders-label").textContent = isAllStats ? "總訂單" : "當日訂單";
+  document.querySelector("#stats-sales-label").textContent = isAllStats ? "總營業額" : "當日營業額";
+  document.querySelector("#popular-title").textContent = isAllStats ? "總熱銷" : "當日熱銷";
+  document.querySelector("#history-title").textContent = isAllStats ? "全部訂單" : "當日訂單";
   document.querySelector("#stats-date").textContent =
-    `${selectedDay.replaceAll("-", "/")} 每日統計，訂單資料${state.online ? "集中保存在伺服器" : "保存在目前瀏覽器"}`;
+    `${isAllStats ? "全部累計" : `${selectedDay.replaceAll("-", "/")} 單日統計`}，訂單資料${state.online ? "集中保存在伺服器" : "保存在目前瀏覽器"}`;
   document.querySelector("#stats-orders").textContent = report.orders;
   document.querySelector("#stats-servings").textContent = report.servings;
   document.querySelector("#stats-sales").textContent = formatMoney(report.sales);
 
   const popularItems = document.querySelector("#popular-items");
   if (!report.items.length) {
-    popularItems.innerHTML = '<p class="stats-empty">這一天尚未有完成的訂單。</p>';
+    popularItems.innerHTML = `<p class="stats-empty">${isAllStats ? "尚未有完成的訂單。" : "這一天尚未有完成的訂單。"}</p>`;
   } else {
     popularItems.replaceChildren(...report.items.map((item, index) => {
       const row = document.createElement("div");
@@ -284,9 +287,9 @@ function renderStats() {
   }
 
   const orderHistory = document.querySelector("#order-history");
-  const selectedOrders = state.orders.filter((order) => order.day === selectedDay);
+  const selectedOrders = isAllStats ? state.orders : state.orders.filter((order) => order.day === selectedDay);
   if (!selectedOrders.length) {
-    orderHistory.innerHTML = '<p class="stats-empty">這一天還沒有訂單明細。</p>';
+    orderHistory.innerHTML = `<p class="stats-empty">${isAllStats ? "還沒有訂單明細。" : "這一天還沒有訂單明細。"}</p>`;
     return;
   }
   orderHistory.replaceChildren(...selectedOrders.slice(0, 50).map((order) => {
@@ -317,7 +320,12 @@ document.querySelector("#open-stats").addEventListener("click", () => {
   statsDialog.showModal();
 });
 document.querySelector("[data-close-stats]").addEventListener("click", () => statsDialog.close());
+document.querySelector("#stats-scope").addEventListener("change", (event) => {
+  state.statsScope = event.target.value === "day" ? "day" : "all";
+  renderStats();
+});
 document.querySelector("#stats-day").addEventListener("change", (event) => {
+  state.statsScope = "day";
   state.statsDay = event.target.value || todayKey();
   renderStats();
 });
@@ -394,7 +402,7 @@ function saveLocalOrder(order, number, customerData) {
     method: "pickup",
     count: order.count,
     subtotal: order.subtotal,
-    discount: order.discount,
+    discount: 0,
     total: order.total,
     items: order.items.map(({ id, name: itemName, emoji, quantity, lineTotal }) => ({
       id, name: itemName, emoji, quantity, lineTotal

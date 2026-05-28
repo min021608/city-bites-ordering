@@ -7,16 +7,14 @@ test("calculates cart lines and item count", () => {
 
   assert.equal(order.count, 3);
   assert.equal(order.subtotal, 350);
-  assert.equal(order.discount, 0);
   assert.equal(order.total, 350);
 });
 
-test("applies the full-order discount", () => {
+test("keeps the total equal to the subtotal", () => {
   const order = calculateOrder({ "beef-bowl": 2 });
 
   assert.equal(order.subtotal, 520);
-  assert.equal(order.discount, 50);
-  assert.equal(order.total, 470);
+  assert.equal(order.total, 520);
 });
 
 test("formats prices", () => {
@@ -56,4 +54,26 @@ test("summarizes today's completed orders and popular items", () => {
   assert.equal(report.sales, 415);
   assert.equal(report.items[0].name, "乾麵");
   assert.equal(report.items[0].quantity, 2);
+});
+
+test("summarizes all completed orders when no day is selected", () => {
+  const report = summarizeOrders([
+    {
+      day: "2026-05-27",
+      count: 3,
+      total: 350,
+      items: [{ name: "乾麵", emoji: "🍜", quantity: 2, lineTotal: 110 }]
+    },
+    {
+      day: "2026-05-26",
+      count: 9,
+      total: 999,
+      items: [{ name: "冰茶", emoji: "🥤", quantity: 9, lineTotal: 585 }]
+    }
+  ]);
+
+  assert.equal(report.orders, 2);
+  assert.equal(report.servings, 12);
+  assert.equal(report.sales, 1349);
+  assert.equal(report.items[0].name, "冰茶");
 });

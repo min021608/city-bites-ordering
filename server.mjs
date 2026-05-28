@@ -155,7 +155,7 @@ async function handleApi(request, response, store) {
       method: "pickup",
       count: order.count,
       subtotal: order.subtotal,
-      discount: order.discount,
+      discount: 0,
       total: order.total,
       items: order.items.map(({ id, name, emoji, quantity, lineTotal }) => ({
         id, name, emoji, quantity, lineTotal

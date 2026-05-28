@@ -35,7 +35,7 @@
         <div class="hero-content">
           <p class="eyebrow">TAIPEI DAILY KITCHEN</p>
           <h1>今天想吃的，<br>先點好再來拿。</h1>
-          <p class="subtitle">新鮮現做的城市料理，從暖心飯食到清爽沙拉。滿 <strong>NT$500</strong> 現折 NT$50。</p>
+          <p class="subtitle">新鮮現做的城市料理，從暖心飯食到清爽沙拉。先點餐，再到店自取。</p>
           <a class="cta" href="#menu">開始點餐</a>
         </div>
         <div class="hero-card">
@@ -49,7 +49,7 @@
 
       <section class="benefits" id="info">
         <article><strong>20 分鐘可取</strong><span>下單後現做，完成即可自取</span></article>
-        <article><strong>滿 NT$500 折 NT$50</strong><span>購物車自動套用優惠</span></article>
+        <article><strong>透明計價</strong><span>餐點金額直接加總</span></article>
         <article><strong>營業時間</strong><span>每日 10:30 - 21:00</span></article>
       </section>
 
@@ -77,10 +77,8 @@
           <div id="cart-items" class="cart-items"></div>
           <dl class="totals">
             <div><dt>小計</dt><dd id="subtotal">NT$0</dd></div>
-            <div><dt>折扣</dt><dd id="discount">- NT$0</dd></div>
             <div class="grand"><dt>總計</dt><dd id="total">NT$0</dd></div>
           </dl>
-          <p id="promotion" class="promotion"></p>
           <button class="checkout" id="checkout" type="button" disabled>前往結帳</button>
         </aside>
       </section>
@@ -118,22 +116,30 @@
           </div>
           <button class="close" type="button" data-close-stats aria-label="關閉訂單統計">×</button>
         </div>
-        <label class="stats-day-picker">統計日期
-          <input id="stats-day" type="date">
-        </label>
+        <div class="stats-controls">
+          <label>統計範圍
+            <select id="stats-scope">
+              <option value="all">全部總數</option>
+              <option value="day">單日統計</option>
+            </select>
+          </label>
+          <label id="stats-day-field">統計日期
+            <input id="stats-day" type="date">
+          </label>
+        </div>
         <div class="stats-cards">
-          <article><span>當日訂單</span><strong id="stats-orders">0</strong><small>筆</small></article>
+          <article><span id="stats-orders-label">總訂單</span><strong id="stats-orders">0</strong><small>筆</small></article>
           <article><span>售出餐點</span><strong id="stats-servings">0</strong><small>份</small></article>
-          <article><span>當日營業額</span><strong id="stats-sales">NT$0</strong></article>
+          <article><span id="stats-sales-label">總營業額</span><strong id="stats-sales">NT$0</strong></article>
         </div>
         <div class="stats-layout">
           <article class="stats-panel">
-            <h3>當日熱銷</h3>
+            <h3 id="popular-title">總熱銷</h3>
             <div id="popular-items" class="popular-items"></div>
           </article>
           <article class="stats-panel">
             <div class="history-head">
-              <h3>當日訂單</h3>
+              <h3 id="history-title">全部訂單</h3>
               <button id="clear-orders" type="button">清除紀錄</button>
             </div>
             <div id="order-history" class="order-history"></div>

@@ -25,14 +25,13 @@ export function calculateOrder(cart, menuItems = defaultMenuItems) {
   });
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
-  const discount = subtotal >= 500 ? 50 : 0;
-  return { items, count, subtotal, discount, total: subtotal - discount };
+  return { items, count, subtotal, total: subtotal };
 }
 
 export function summarizeOrders(orders, day) {
-  const todayOrders = orders.filter((order) => order.day === day);
+  const matchedOrders = day ? orders.filter((order) => order.day === day) : orders;
   const itemTotals = new Map();
-  todayOrders.forEach((order) => {
+  matchedOrders.forEach((order) => {
     order.items.forEach((item) => {
       const saved = itemTotals.get(item.name) || { name: item.name, emoji: item.emoji, quantity: 0, sales: 0 };
       saved.quantity += item.quantity;
@@ -41,9 +40,9 @@ export function summarizeOrders(orders, day) {
     });
   });
   return {
-    orders: todayOrders.length,
-    servings: todayOrders.reduce((sum, order) => sum + order.count, 0),
-    sales: todayOrders.reduce((sum, order) => sum + order.total, 0),
+    orders: matchedOrders.length,
+    servings: matchedOrders.reduce((sum, order) => sum + order.count, 0),
+    sales: matchedOrders.reduce((sum, order) => sum + order.total, 0),
     items: [...itemTotals.values()].sort((left, right) => right.quantity - left.quantity || right.sales - left.sales)
   };
 }

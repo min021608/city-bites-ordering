@@ -14,7 +14,8 @@ const state = {
   menu: Array.isArray(savedMenu) && savedMenu.length ? savedMenu : structuredClone(defaultMenuItems),
   orders: Array.isArray(savedOrders) ? savedOrders : [],
   category: "全部",
-  search: ""
+  search: "",
+  statsDay: todayKey()
 };
 const menuGrid = document.querySelector("#menu-grid");
 const cartItems = document.querySelector("#cart-items");
@@ -255,17 +256,18 @@ async function saveEditedMenu() {
 }
 
 function renderStats() {
-  const today = todayKey();
-  const report = summarizeOrders(state.orders, today);
+  const selectedDay = state.statsDay || todayKey();
+  const report = summarizeOrders(state.orders, selectedDay);
+  document.querySelector("#stats-day").value = selectedDay;
   document.querySelector("#stats-date").textContent =
-    `${today.replaceAll("-", "/")} 今日統計，訂單資料${state.online ? "集中保存在伺服器" : "保存在目前瀏覽器"}`;
+    `${selectedDay.replaceAll("-", "/")} 每日統計，訂單資料${state.online ? "集中保存在伺服器" : "保存在目前瀏覽器"}`;
   document.querySelector("#stats-orders").textContent = report.orders;
   document.querySelector("#stats-servings").textContent = report.servings;
   document.querySelector("#stats-sales").textContent = formatMoney(report.sales);
 
   const popularItems = document.querySelector("#popular-items");
   if (!report.items.length) {
-    popularItems.innerHTML = '<p class="stats-empty">今天尚未有完成的訂單。</p>';
+    popularItems.innerHTML = '<p class="stats-empty">這一天尚未有完成的訂單。</p>';
   } else {
     popularItems.replaceChildren(...report.items.map((item, index) => {
       const row = document.createElement("div");
@@ -282,11 +284,12 @@ function renderStats() {
   }
 
   const orderHistory = document.querySelector("#order-history");
-  if (!state.orders.length) {
-    orderHistory.innerHTML = '<p class="stats-empty">送出訂單後會在這裡顯示明細。</p>';
+  const selectedOrders = state.orders.filter((order) => order.day === selectedDay);
+  if (!selectedOrders.length) {
+    orderHistory.innerHTML = '<p class="stats-empty">這一天還沒有訂單明細。</p>';
     return;
   }
-  orderHistory.replaceChildren(...state.orders.slice(0, 20).map((order) => {
+  orderHistory.replaceChildren(...selectedOrders.slice(0, 50).map((order) => {
     const card = document.createElement("div");
     card.className = "history-row";
     const header = document.createElement("div");
@@ -314,6 +317,10 @@ document.querySelector("#open-stats").addEventListener("click", () => {
   statsDialog.showModal();
 });
 document.querySelector("[data-close-stats]").addEventListener("click", () => statsDialog.close());
+document.querySelector("#stats-day").addEventListener("change", (event) => {
+  state.statsDay = event.target.value || todayKey();
+  renderStats();
+});
 document.querySelector("#clear-orders").addEventListener("click", () => {
   if (!window.confirm("確定清除所有訂單紀錄嗎？")) return;
   clearOrders().finally(renderStats);

@@ -118,19 +118,22 @@
           </div>
           <button class="close" type="button" data-close-stats aria-label="關閉訂單統計">×</button>
         </div>
+        <label class="stats-day-picker">統計日期
+          <input id="stats-day" type="date">
+        </label>
         <div class="stats-cards">
-          <article><span>今日訂單</span><strong id="stats-orders">0</strong><small>筆</small></article>
+          <article><span>當日訂單</span><strong id="stats-orders">0</strong><small>筆</small></article>
           <article><span>售出餐點</span><strong id="stats-servings">0</strong><small>份</small></article>
-          <article><span>今日營業額</span><strong id="stats-sales">NT$0</strong></article>
+          <article><span>當日營業額</span><strong id="stats-sales">NT$0</strong></article>
         </div>
         <div class="stats-layout">
           <article class="stats-panel">
-            <h3>今日熱銷</h3>
+            <h3>當日熱銷</h3>
             <div id="popular-items" class="popular-items"></div>
           </article>
           <article class="stats-panel">
             <div class="history-head">
-              <h3>最近訂單</h3>
+              <h3>當日訂單</h3>
               <button id="clear-orders" type="button">清除紀錄</button>
             </div>
             <div id="order-history" class="order-history"></div>

@@ -452,6 +452,26 @@ h1 {
 .history-row small { color: #5a4f49; display: block; font-size: 12px; line-height: 1.5; }
 .stats-empty { color: var(--muted); font-size: 13px; line-height: 1.7; margin: 22px 0; text-align: center; }
 .manager-note { color: var(--muted); font-size: 13px; margin: 7px 0 0; }
+.stats-day-picker {
+  align-items: center;
+  background: #fff8f2;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  display: flex;
+  font-size: 13px;
+  gap: 10px;
+  justify-content: space-between;
+  margin: 14px 0;
+  padding: 10px 12px;
+}
+.stats-day-picker input {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--ink);
+  font: inherit;
+  padding: 8px 10px;
+}
 .edit-labels, .edit-row {
   display: grid;
   gap: 10px;

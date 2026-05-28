@@ -49,6 +49,16 @@ function persistOrders() {
   localStorage.setItem("city-bites-orders", JSON.stringify(state.orders));
 }
 
+function mergeOrders(...groups) {
+  const orders = new Map();
+  groups.flat().forEach((order) => {
+    if (!order || !order.number) return;
+    orders.set(order.number, { ...orders.get(order.number), ...order });
+  });
+  return [...orders.values()].sort((left, right) =>
+    new Date(right.createdAt || 0) - new Date(left.createdAt || 0));
+}
+
 function todayKey(date = new Date()) {
   return [
     date.getFullYear(),
@@ -372,7 +382,8 @@ checkoutForm.addEventListener("submit", (event) => {
 async function refreshOrders() {
   try {
     const payload = await apiRequest("/api/orders");
-    state.orders = payload.orders;
+    state.orders = mergeOrders(payload.orders, state.orders);
+    persistOrders();
     state.online = true;
   } catch {
     state.online = false;
@@ -426,14 +437,15 @@ async function submitOrder() {
       body: JSON.stringify({ cart: state.cart, ...customerData })
     });
     savedOrder = payload.order;
-    state.orders.unshift(savedOrder);
+    state.orders = mergeOrders([savedOrder], state.orders);
+    persistOrders();
     state.online = true;
   } catch {
     savedOrder = saveLocalOrder(order, number, customerData);
     state.online = false;
   }
   document.querySelector("#success-message").textContent =
-    `${customerData.customer}，訂單編號 ${savedOrder.number}，共 ${formatMoney(savedOrder.total)}。預計 20 分鐘後可自取。`;
+    `${customerData.customer}，訂單編號 ${savedOrder.number}，共 ${formatMoney(savedOrder.total)}。請到店自取。`;
   state.cart = {};
   persist();
   checkoutForm.reset();
@@ -449,7 +461,8 @@ async function initialize() {
       apiRequest("/api/orders")
     ]);
     state.menu = menuPayload.menu;
-    state.orders = orderPayload.orders;
+    state.orders = mergeOrders(orderPayload.orders, state.orders);
+    persistOrders();
     state.online = true;
   } catch {
     state.online = false;

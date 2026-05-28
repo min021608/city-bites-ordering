@@ -640,7 +640,7 @@ h1 {
       </section>
 
       <section class="benefits" id="info">
-        <article><strong>20 分鐘可取</strong><span>下單後現做，完成即可自取</span></article>
+        <article><strong>自取訂單</strong><span>下單後到店取餐</span></article>
         <article><strong>透明計價</strong><span>餐點金額直接加總</span></article>
         <article><strong>營業時間</strong><span>每日 10:30 - 21:00</span></article>
       </section>
@@ -857,6 +857,16 @@ function persistMenu() {
 
 function persistOrders() {
   localStorage.setItem("city-bites-orders", JSON.stringify(state.orders));
+}
+
+function mergeOrders(...groups) {
+  const orders = new Map();
+  groups.flat().forEach((order) => {
+    if (!order || !order.number) return;
+    orders.set(order.number, { ...orders.get(order.number), ...order });
+  });
+  return [...orders.values()].sort((left, right) =>
+    new Date(right.createdAt || 0) - new Date(left.createdAt || 0));
 }
 
 function todayKey(date = new Date()) {
@@ -1182,7 +1192,8 @@ checkoutForm.addEventListener("submit", (event) => {
 async function refreshOrders() {
   try {
     const payload = await apiRequest("/api/orders");
-    state.orders = payload.orders;
+    state.orders = mergeOrders(payload.orders, state.orders);
+    persistOrders();
     state.online = true;
   } catch {
     state.online = false;
@@ -1236,14 +1247,15 @@ async function submitOrder() {
       body: JSON.stringify({ cart: state.cart, ...customerData })
     });
     savedOrder = payload.order;
-    state.orders.unshift(savedOrder);
+    state.orders = mergeOrders([savedOrder], state.orders);
+    persistOrders();
     state.online = true;
   } catch {
     savedOrder = saveLocalOrder(order, number, customerData);
     state.online = false;
   }
   document.querySelector("#success-message").textContent =
-    `${customerData.customer}，訂單編號 ${savedOrder.number}，共 ${formatMoney(savedOrder.total)}。預計 20 分鐘後可自取。`;
+    `${customerData.customer}，訂單編號 ${savedOrder.number}，共 ${formatMoney(savedOrder.total)}。請到店自取。`;
   state.cart = {};
   persist();
   checkoutForm.reset();
@@ -1259,7 +1271,8 @@ async function initialize() {
       apiRequest("/api/orders")
     ]);
     state.menu = menuPayload.menu;
-    state.orders = orderPayload.orders;
+    state.orders = mergeOrders(orderPayload.orders, state.orders);
+    persistOrders();
     state.online = true;
   } catch {
     state.online = false;

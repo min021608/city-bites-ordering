@@ -3,7 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>城市食光 | 線上訂餐</title>
+    <meta name="theme-color" content="#f3653f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="小馬訂餐平台">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>小馬訂餐平台</title>
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.svg">
     <style>
 :root {
   --cream: #fffaf4;
@@ -576,13 +582,13 @@ h1 {
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href="#" aria-label="城市食光首頁">
-        <span class="brand-mark">食</span>
-        <span><strong>城市食光</strong><small>City Bites</small></span>
+      <a class="brand" href="#" aria-label="小馬訂餐平台首頁">
+        <span class="brand-mark">馬</span>
+        <span><strong>小馬訂餐平台</strong><small>Pony Orders</small></span>
       </a>
       <nav aria-label="網站功能">
         <a href="#menu">熱門餐點</a>
-        <a href="#delivery">外送資訊</a>
+        <a href="#info">取餐資訊</a>
         <button class="report-menu" type="button" id="open-stats">訂單統計</button>
         <button class="manage-menu" type="button" id="manage-menu">編輯菜單</button>
         <button class="cart-jump" type="button" id="cart-jump">
@@ -595,7 +601,7 @@ h1 {
       <section class="hero" aria-label="餐廳介紹">
         <div class="hero-content">
           <p class="eyebrow">TAIPEI DAILY KITCHEN</p>
-          <h1>今天想吃的，<br>現在就送到。</h1>
+          <h1>今天想吃的，<br>先點好再來拿。</h1>
           <p class="subtitle">新鮮現做的城市料理，從暖心飯食到清爽沙拉。滿 <strong>NT$500</strong> 現折 NT$50。</p>
           <a class="cta" href="#menu">開始點餐</a>
         </div>
@@ -608,9 +614,9 @@ h1 {
         </div>
       </section>
 
-      <section class="benefits" id="delivery">
-        <article><strong>30 分鐘送達</strong><span>鄰近區域快速外送</span></article>
-        <article><strong>滿 NT$399 免運</strong><span>未滿外送費 NT$49</span></article>
+      <section class="benefits" id="info">
+        <article><strong>20 分鐘可取</strong><span>下單後現做，完成即可自取</span></article>
+        <article><strong>滿 NT$500 折 NT$50</strong><span>購物車自動套用優惠</span></article>
         <article><strong>營業時間</strong><span>每日 10:30 - 21:00</span></article>
       </section>
 
@@ -636,14 +642,9 @@ h1 {
             <span id="cart-count">0 項</span>
           </div>
           <div id="cart-items" class="cart-items"></div>
-          <div class="method" role="group" aria-label="取餐方式">
-            <button class="selected" type="button" data-method="delivery">外送</button>
-            <button type="button" data-method="pickup">自取</button>
-          </div>
           <dl class="totals">
             <div><dt>小計</dt><dd id="subtotal">NT$0</dd></div>
             <div><dt>折扣</dt><dd id="discount">- NT$0</dd></div>
-            <div><dt>外送費</dt><dd id="delivery-fee">NT$0</dd></div>
             <div class="grand"><dt>總計</dt><dd id="total">NT$0</dd></div>
           </dl>
           <p id="promotion" class="promotion"></p>
@@ -710,22 +711,12 @@ h1 {
         <div class="dialog-head">
           <div>
             <p class="eyebrow">CHECKOUT</p>
-            <h2>完成訂單</h2>
+            <h2>訂購者資訊</h2>
           </div>
           <button class="close" type="button" data-close-checkout aria-label="關閉結帳視窗">×</button>
         </div>
         <div class="fields">
           <label>姓名<input name="name" autocomplete="name" required placeholder="王小明"></label>
-          <label>電話<input name="phone" type="tel" autocomplete="tel" required placeholder="0912-345-678"></label>
-          <label id="address-field" class="full">外送地址<input name="address" autocomplete="street-address" placeholder="台北市信義區城市路 10 號"></label>
-          <label class="full">備註<textarea name="note" placeholder="例如：不要辣、管理室代收"></textarea></label>
-          <label class="full">付款方式
-            <select name="payment">
-              <option>現金付款</option>
-              <option>信用卡付款</option>
-              <option>行動支付</option>
-            </select>
-          </label>
         </div>
         <div class="order-bar">
           <p>應付總額 <strong id="dialog-total">NT$0</strong></p>
@@ -761,7 +752,7 @@ function formatMoney(value) {
   return `NT${value.toLocaleString("zh-TW")}`;
 }
 
-function calculateOrder(cart, method = "delivery", menuItems = defaultMenuItems) {
+function calculateOrder(cart, menuItems = defaultMenuItems) {
   const items = Object.entries(cart).flatMap(([id, quantity]) => {
     const item = menuItems.find((entry) => entry.id === id);
     return item && quantity > 0 ? [{ ...item, quantity, lineTotal: item.price * quantity }] : [];
@@ -769,8 +760,7 @@ function calculateOrder(cart, method = "delivery", menuItems = defaultMenuItems)
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
   const discount = subtotal >= 500 ? 50 : 0;
-  const deliveryFee = method === "delivery" && subtotal > 0 && subtotal < 399 ? 49 : 0;
-  return { items, count, subtotal, discount, deliveryFee, total: subtotal - discount + deliveryFee };
+  return { items, count, subtotal, discount, total: subtotal - discount };
 }
 
 function summarizeOrders(orders, day) {
@@ -801,8 +791,7 @@ const state = {
   menu: Array.isArray(savedMenu) && savedMenu.length ? savedMenu : structuredClone(defaultMenuItems),
   orders: Array.isArray(savedOrders) ? savedOrders : [],
   category: "全部",
-  search: "",
-  method: "delivery"
+  search: ""
 };
 const menuGrid = document.querySelector("#menu-grid");
 const cartItems = document.querySelector("#cart-items");
@@ -812,6 +801,16 @@ const statsDialog = document.querySelector("#stats-dialog");
 const checkoutDialog = document.querySelector("#checkout-dialog");
 const successDialog = document.querySelector("#success-dialog");
 const checkoutForm = document.querySelector("#checkout-form");
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(path, {
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    ...options
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || "伺服器暫時無法處理");
+  return payload;
+}
 
 function persist() {
   localStorage.setItem("city-bites-cart", JSON.stringify(state.cart));
@@ -910,7 +909,7 @@ function renderMenu() {
 }
 
 function renderCart() {
-  const order = calculateOrder(state.cart, state.method, state.menu);
+  const order = calculateOrder(state.cart, state.menu);
   if (!order.items.length) {
     cartItems.innerHTML = '<div class="empty-cart"><span>🛍️</span><p>購物車是空的<br>挑一份喜歡的餐點吧</p></div>';
   } else {
@@ -952,7 +951,6 @@ function renderCart() {
   document.querySelector("#top-cart-count").textContent = order.count;
   document.querySelector("#subtotal").textContent = formatMoney(order.subtotal);
   document.querySelector("#discount").textContent = `- ${formatMoney(order.discount)}`;
-  document.querySelector("#delivery-fee").textContent = order.deliveryFee ? formatMoney(order.deliveryFee) : "免費";
   document.querySelector("#total").textContent = formatMoney(order.total);
   document.querySelector("#dialog-total").textContent = formatMoney(order.total);
   document.querySelector("#checkout").disabled = !order.items.length;
@@ -1007,7 +1005,7 @@ function renderEditor() {
   }));
 }
 
-function saveEditedMenu() {
+async function saveEditedMenu() {
   state.menu = [...menuEditor.querySelectorAll(".edit-row")].map((row) => ({
     id: row.dataset.id,
     emoji: row.querySelector('[name="emoji"]').value.trim() || "🍽️",
@@ -1016,7 +1014,17 @@ function saveEditedMenu() {
     category: row.querySelector('[name="category"]').value.trim(),
     price: Number(row.querySelector('[name="price"]').value)
   }));
-  persistMenu();
+  try {
+    const payload = await apiRequest("/api/menu", {
+      method: "PUT",
+      body: JSON.stringify({ menu: state.menu })
+    });
+    state.menu = payload.menu;
+    state.online = true;
+  } catch {
+    state.online = false;
+    persistMenu();
+  }
   renderFeatured();
   renderCategories();
   renderMenu();
@@ -1027,7 +1035,7 @@ function renderStats() {
   const today = todayKey();
   const report = summarizeOrders(state.orders, today);
   document.querySelector("#stats-date").textContent =
-    `${today.replaceAll("-", "/")} 今日統計，訂單資料保存在目前瀏覽器`;
+    `${today.replaceAll("-", "/")} 今日統計，訂單資料${state.online ? "集中保存在伺服器" : "保存在目前瀏覽器"}`;
   document.querySelector("#stats-orders").textContent = report.orders;
   document.querySelector("#stats-servings").textContent = report.servings;
   document.querySelector("#stats-sales").textContent = formatMoney(report.sales);
@@ -1066,7 +1074,7 @@ function renderStats() {
     header.append(number, total);
     const meta = document.createElement("p");
     const time = new Date(order.createdAt).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
-    meta.textContent = `${time} | ${order.method === "delivery" ? "外送" : "自取"} | ${order.customer}`;
+    meta.textContent = `${time} | 自取 | ${order.customer}`;
     const items = document.createElement("small");
     items.textContent = order.items.map((item) => `${item.name} x${item.quantity}`).join("、");
     card.append(header, meta, items);
@@ -1074,32 +1082,18 @@ function renderStats() {
   }));
 }
 
-function selectMethod(method) {
-  state.method = method;
-  document.querySelectorAll("[data-method]").forEach((button) => {
-    button.classList.toggle("selected", button.dataset.method === method);
-  });
-  const address = checkoutForm.elements.address;
-  const needsAddress = method === "delivery";
-  address.required = needsAddress;
-  document.querySelector("#address-field").hidden = !needsAddress;
-  renderCart();
-}
-
 document.querySelector("#manage-menu").addEventListener("click", () => {
   renderEditor();
   menuDialog.showModal();
 });
 document.querySelector("#open-stats").addEventListener("click", () => {
-  renderStats();
+  refreshOrders().finally(renderStats);
   statsDialog.showModal();
 });
 document.querySelector("[data-close-stats]").addEventListener("click", () => statsDialog.close());
 document.querySelector("#clear-orders").addEventListener("click", () => {
   if (!window.confirm("確定清除所有訂單紀錄嗎？")) return;
-  state.orders = [];
-  persistOrders();
-  renderStats();
+  clearOrders().finally(renderStats);
 });
 document.querySelector("[data-close-menu]").addEventListener("click", () => menuDialog.close());
 document.querySelector("#add-item").addEventListener("click", () => {
@@ -1126,9 +1120,6 @@ document.querySelector("#search").addEventListener("input", (event) => {
   state.search = event.target.value;
   renderMenu();
 });
-document.querySelectorAll("[data-method]").forEach((button) => {
-  button.addEventListener("click", () => selectMethod(button.dataset.method));
-});
 document.querySelector("#cart-jump").addEventListener("click", () => {
   document.querySelector("#cart").scrollIntoView({ behavior: "smooth", block: "start" });
 });
@@ -1137,40 +1128,100 @@ document.querySelector("[data-close-checkout]").addEventListener("click", () => 
 document.querySelector("#continue").addEventListener("click", () => successDialog.close());
 checkoutForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const order = calculateOrder(state.cart, state.method, state.menu);
-  const name = checkoutForm.elements.name.value.trim();
-  const number = `CB${String(Date.now()).slice(-6)}`;
-  const service = state.method === "delivery" ? "預計 30 分鐘內送達" : "預計 20 分鐘後可自取";
-  state.orders.unshift({
+  submitOrder();
+});
+
+async function refreshOrders() {
+  try {
+    const payload = await apiRequest("/api/orders");
+    state.orders = payload.orders;
+    state.online = true;
+  } catch {
+    state.online = false;
+  }
+}
+
+async function clearOrders() {
+  try {
+    await apiRequest("/api/orders", { method: "DELETE" });
+    state.online = true;
+  } catch {
+    state.online = false;
+  }
+  state.orders = [];
+  persistOrders();
+}
+
+function saveLocalOrder(order, number, customerData) {
+  const savedOrder = {
     number,
     day: todayKey(),
     createdAt: new Date().toISOString(),
-    customer: name,
-    method: state.method,
+    customer: customerData.customer,
+    phone: "",
+    note: "",
+    payment: "現金付款",
+    method: "pickup",
     count: order.count,
     subtotal: order.subtotal,
     discount: order.discount,
-    deliveryFee: order.deliveryFee,
     total: order.total,
     items: order.items.map(({ id, name: itemName, emoji, quantity, lineTotal }) => ({
       id, name: itemName, emoji, quantity, lineTotal
     }))
-  });
+  };
+  state.orders.unshift(savedOrder);
   persistOrders();
+  return savedOrder;
+}
+
+async function submitOrder() {
+  const order = calculateOrder(state.cart, state.menu);
+  const customerData = {
+    customer: checkoutForm.elements.name.value.trim()
+  };
+  const number = `CB${String(Date.now()).slice(-6)}`;
+  let savedOrder;
+  try {
+    const payload = await apiRequest("/api/orders", {
+      method: "POST",
+      body: JSON.stringify({ cart: state.cart, ...customerData })
+    });
+    savedOrder = payload.order;
+    state.orders.unshift(savedOrder);
+    state.online = true;
+  } catch {
+    savedOrder = saveLocalOrder(order, number, customerData);
+    state.online = false;
+  }
   document.querySelector("#success-message").textContent =
-    `${name}，訂單編號 ${number}，共 ${formatMoney(order.total)}。${service}。`;
+    `${customerData.customer}，訂單編號 ${savedOrder.number}，共 ${formatMoney(savedOrder.total)}。預計 20 分鐘後可自取。`;
   state.cart = {};
   persist();
   checkoutForm.reset();
   checkoutDialog.close();
   renderCart();
   successDialog.showModal();
-});
+}
 
-selectMethod("delivery");
-renderFeatured();
-renderCategories();
-renderMenu();
+async function initialize() {
+  try {
+    const [menuPayload, orderPayload] = await Promise.all([
+      apiRequest("/api/menu"),
+      apiRequest("/api/orders")
+    ]);
+    state.menu = menuPayload.menu;
+    state.orders = orderPayload.orders;
+    state.online = true;
+  } catch {
+    state.online = false;
+  }
+  renderFeatured();
+  renderCategories();
+  renderMenu();
+}
+
+initialize();
 
 </script>
   </body>

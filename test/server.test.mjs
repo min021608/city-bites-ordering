@@ -51,14 +51,13 @@ test("creates server-side orders from cart and clears order history", async () =
       method: "POST",
       body: JSON.stringify({
         cart: { "chicken-rice": 1, tea: 2 },
-        method: "delivery",
-        customer: "測試客人",
-        phone: "0912345678"
+        customer: "測試客人"
       })
     });
     assert.equal(created.response.status, 201);
     assert.equal(created.payload.order.customer, "測試客人");
-    assert.equal(created.payload.order.total, 399);
+    assert.equal(created.payload.order.method, "pickup");
+    assert.equal(created.payload.order.total, 350);
     assert.equal(created.payload.order.items.length, 2);
 
     const orders = await jsonFetch(baseUrl, "/api/orders");

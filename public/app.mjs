@@ -1,5 +1,11 @@
 import { calculateOrder, categoriesFor, defaultMenuItems, formatMoney, summarizeOrders } from "./store.mjs";
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
 const savedCart = JSON.parse(localStorage.getItem("city-bites-cart") || "{}");
 const savedMenu = JSON.parse(localStorage.getItem("city-bites-menu") || "null");
 const savedOrders = JSON.parse(localStorage.getItem("city-bites-orders") || "[]");
@@ -8,8 +14,7 @@ const state = {
   menu: Array.isArray(savedMenu) && savedMenu.length ? savedMenu : structuredClone(defaultMenuItems),
   orders: Array.isArray(savedOrders) ? savedOrders : [],
   category: "全部",
-  search: "",
-  method: "delivery"
+  search: ""
 };
 const menuGrid = document.querySelector("#menu-grid");
 const cartItems = document.querySelector("#cart-items");
@@ -127,7 +132,7 @@ function renderMenu() {
 }
 
 function renderCart() {
-  const order = calculateOrder(state.cart, state.method, state.menu);
+  const order = calculateOrder(state.cart, state.menu);
   if (!order.items.length) {
     cartItems.innerHTML = '<div class="empty-cart"><span>🛍️</span><p>購物車是空的<br>挑一份喜歡的餐點吧</p></div>';
   } else {
@@ -169,7 +174,6 @@ function renderCart() {
   document.querySelector("#top-cart-count").textContent = order.count;
   document.querySelector("#subtotal").textContent = formatMoney(order.subtotal);
   document.querySelector("#discount").textContent = `- ${formatMoney(order.discount)}`;
-  document.querySelector("#delivery-fee").textContent = order.deliveryFee ? formatMoney(order.deliveryFee) : "免費";
   document.querySelector("#total").textContent = formatMoney(order.total);
   document.querySelector("#dialog-total").textContent = formatMoney(order.total);
   document.querySelector("#checkout").disabled = !order.items.length;
@@ -293,24 +297,12 @@ function renderStats() {
     header.append(number, total);
     const meta = document.createElement("p");
     const time = new Date(order.createdAt).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
-    meta.textContent = `${time} | ${order.method === "delivery" ? "外送" : "自取"} | ${order.customer}`;
+    meta.textContent = `${time} | 自取 | ${order.customer}`;
     const items = document.createElement("small");
     items.textContent = order.items.map((item) => `${item.name} x${item.quantity}`).join("、");
     card.append(header, meta, items);
     return card;
   }));
-}
-
-function selectMethod(method) {
-  state.method = method;
-  document.querySelectorAll("[data-method]").forEach((button) => {
-    button.classList.toggle("selected", button.dataset.method === method);
-  });
-  const address = checkoutForm.elements.address;
-  const needsAddress = method === "delivery";
-  address.required = needsAddress;
-  document.querySelector("#address-field").hidden = !needsAddress;
-  renderCart();
 }
 
 document.querySelector("#manage-menu").addEventListener("click", () => {
@@ -351,9 +343,6 @@ document.querySelector("#search").addEventListener("input", (event) => {
   state.search = event.target.value;
   renderMenu();
 });
-document.querySelectorAll("[data-method]").forEach((button) => {
-  button.addEventListener("click", () => selectMethod(button.dataset.method));
-});
 document.querySelector("#cart-jump").addEventListener("click", () => {
   document.querySelector("#cart").scrollIntoView({ behavior: "smooth", block: "start" });
 });
@@ -392,15 +381,13 @@ function saveLocalOrder(order, number, customerData) {
     day: todayKey(),
     createdAt: new Date().toISOString(),
     customer: customerData.customer,
-    phone: customerData.phone,
-    address: customerData.address,
-    note: customerData.note,
-    payment: customerData.payment,
-    method: state.method,
+    phone: "",
+    note: "",
+    payment: "現金付款",
+    method: "pickup",
     count: order.count,
     subtotal: order.subtotal,
     discount: order.discount,
-    deliveryFee: order.deliveryFee,
     total: order.total,
     items: order.items.map(({ id, name: itemName, emoji, quantity, lineTotal }) => ({
       id, name: itemName, emoji, quantity, lineTotal
@@ -412,20 +399,16 @@ function saveLocalOrder(order, number, customerData) {
 }
 
 async function submitOrder() {
-  const order = calculateOrder(state.cart, state.method, state.menu);
+  const order = calculateOrder(state.cart, state.menu);
   const customerData = {
-    customer: checkoutForm.elements.name.value.trim(),
-    phone: checkoutForm.elements.phone.value.trim(),
-    address: checkoutForm.elements.address.value.trim(),
-    note: checkoutForm.elements.note.value.trim(),
-    payment: checkoutForm.elements.payment.value
+    customer: checkoutForm.elements.name.value.trim()
   };
   const number = `CB${String(Date.now()).slice(-6)}`;
   let savedOrder;
   try {
     const payload = await apiRequest("/api/orders", {
       method: "POST",
-      body: JSON.stringify({ cart: state.cart, method: state.method, ...customerData })
+      body: JSON.stringify({ cart: state.cart, ...customerData })
     });
     savedOrder = payload.order;
     state.orders.unshift(savedOrder);
@@ -434,9 +417,8 @@ async function submitOrder() {
     savedOrder = saveLocalOrder(order, number, customerData);
     state.online = false;
   }
-  const service = state.method === "delivery" ? "預計 30 分鐘內送達" : "預計 20 分鐘後可自取";
   document.querySelector("#success-message").textContent =
-    `${customerData.customer}，訂單編號 ${savedOrder.number}，共 ${formatMoney(savedOrder.total)}。${service}。`;
+    `${customerData.customer}，訂單編號 ${savedOrder.number}，共 ${formatMoney(savedOrder.total)}。預計 20 分鐘後可自取。`;
   state.cart = {};
   persist();
   checkoutForm.reset();
@@ -457,7 +439,6 @@ async function initialize() {
   } catch {
     state.online = false;
   }
-  selectMethod("delivery");
   renderFeatured();
   renderCategories();
   renderMenu();

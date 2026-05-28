@@ -1,0 +1,26 @@
+{
+  "name": "小馬訂餐平台",
+  "short_name": "小馬訂餐",
+  "description": "線上訂餐、購物車、結帳與訂單統計。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fffaf4",
+  "theme_color": "#f3653f",
+  "categories": ["food", "shopping", "business"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

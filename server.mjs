@@ -17,9 +17,12 @@ const HOSTS = (process.env.HOST || DEFAULT_HOSTS)
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
-  ".svg": "image/svg+xml"
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon"
 };
 
 function todayKey(date = new Date()) {
@@ -138,7 +141,7 @@ async function handleApi(request, response, store) {
   if (url.pathname === "/api/orders" && request.method === "POST") {
     const body = await readRequestBody(request);
     const menu = await store.readMenu();
-    const order = calculateOrder(body.cart || {}, body.method || "delivery", menu);
+    const order = calculateOrder(body.cart || {}, menu);
     if (!order.items.length) throw new Error("購物車是空的");
     const createdAt = new Date();
     const savedOrder = {
@@ -147,14 +150,12 @@ async function handleApi(request, response, store) {
       createdAt: createdAt.toISOString(),
       customer: String(body.customer || "未填姓名").trim().slice(0, 60),
       phone: String(body.phone || "").trim().slice(0, 40),
-      address: String(body.address || "").trim().slice(0, 180),
       note: String(body.note || "").trim().slice(0, 240),
       payment: String(body.payment || "現金付款").trim().slice(0, 40),
-      method: body.method === "pickup" ? "pickup" : "delivery",
+      method: "pickup",
       count: order.count,
       subtotal: order.subtotal,
       discount: order.discount,
-      deliveryFee: order.deliveryFee,
       total: order.total,
       items: order.items.map(({ id, name, emoji, quantity, lineTotal }) => ({
         id, name, emoji, quantity, lineTotal
@@ -195,7 +196,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   HOSTS.forEach((host) => {
     createAppServer().listen(PORT, host, () => {
       const label = host.includes(":") ? `[${host}]` : host;
-      console.log(`城市食光訂餐網站已啟動：http://${label}:${PORT}`);
+      console.log(`小馬訂餐平台已啟動：http://${label}:${PORT}`);
     });
   });
 }

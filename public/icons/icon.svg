@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#f3653f"/>
+  <circle cx="256" cy="238" r="132" fill="#fffaf4"/>
+  <path fill="#251b16" d="M171 238c0-47 38-85 85-85s85 38 85 85-38 85-85 85-85-38-85-85Zm56 18c10 16 31 26 52 17 11-5 16-18 11-29-5-12-18-17-29-12-7 3-15 1-19-5-7-10-21-13-31-6-10 8-12 23-4 35Z"/>
+  <path fill="#fffaf4" d="M135 372h242c20 0 36 16 36 36v2H99v-2c0-20 16-36 36-36Z"/>
+  <text x="256" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="#fffaf4">小馬</text>
+</svg>

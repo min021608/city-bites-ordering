@@ -18,7 +18,7 @@ export function formatMoney(value) {
   return `NT$${value.toLocaleString("zh-TW")}`;
 }
 
-export function calculateOrder(cart, method = "delivery", menuItems = defaultMenuItems) {
+export function calculateOrder(cart, menuItems = defaultMenuItems) {
   const items = Object.entries(cart).flatMap(([id, quantity]) => {
     const item = menuItems.find((entry) => entry.id === id);
     return item && quantity > 0 ? [{ ...item, quantity, lineTotal: item.price * quantity }] : [];
@@ -26,8 +26,7 @@ export function calculateOrder(cart, method = "delivery", menuItems = defaultMen
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
   const discount = subtotal >= 500 ? 50 : 0;
-  const deliveryFee = method === "delivery" && subtotal > 0 && subtotal < 399 ? 49 : 0;
-  return { items, count, subtotal, discount, deliveryFee, total: subtotal - discount + deliveryFee };
+  return { items, count, subtotal, discount, total: subtotal - discount };
 }
 
 export function summarizeOrders(orders, day) {

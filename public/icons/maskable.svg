@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#f3653f"/>
+  <circle cx="256" cy="230" r="126" fill="#fffaf4"/>
+  <path fill="#251b16" d="M172 230c0-46 38-84 84-84s84 38 84 84-38 84-84 84-84-38-84-84Zm55 18c10 16 31 26 52 17 11-5 16-18 11-29-5-12-18-17-29-12-7 3-15 1-19-5-7-10-21-13-31-6-10 8-12 23-4 35Z"/>
+  <path fill="#fffaf4" d="M130 360h252c22 0 40 18 40 40v8H90v-8c0-22 18-40 40-40Z"/>
+  <text x="256" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="#fffaf4">訂餐</text>
+</svg>

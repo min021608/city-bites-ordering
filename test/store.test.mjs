@@ -2,27 +2,25 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { calculateOrder, categoriesFor, formatMoney, summarizeOrders } from "../public/store.mjs";
 
-test("calculates cart lines, delivery fee and item count", () => {
+test("calculates cart lines and item count", () => {
   const order = calculateOrder({ "chicken-rice": 1, tea: 2 });
 
   assert.equal(order.count, 3);
   assert.equal(order.subtotal, 350);
-  assert.equal(order.deliveryFee, 49);
   assert.equal(order.discount, 0);
-  assert.equal(order.total, 399);
+  assert.equal(order.total, 350);
 });
 
-test("waives delivery and applies the full-order discount", () => {
-  const order = calculateOrder({ "beef-bowl": 2 }, "delivery");
+test("applies the full-order discount", () => {
+  const order = calculateOrder({ "beef-bowl": 2 });
 
   assert.equal(order.subtotal, 520);
-  assert.equal(order.deliveryFee, 0);
   assert.equal(order.discount, 50);
   assert.equal(order.total, 470);
 });
 
-test("pickup does not charge a delivery fee and formats prices", () => {
-  const order = calculateOrder({ fries: 1 }, "pickup");
+test("formats prices", () => {
+  const order = calculateOrder({ fries: 1 });
 
   assert.equal(order.total, 80);
   assert.equal(formatMoney(order.total), "NT$80");
@@ -30,7 +28,7 @@ test("pickup does not charge a delivery fee and formats prices", () => {
 
 test("calculates an edited custom menu and its categories", () => {
   const customMenu = [{ id: "noodle", name: "乾麵", category: "麵食", price: 55, emoji: "🍜", description: "" }];
-  const order = calculateOrder({ noodle: 2 }, "pickup", customMenu);
+  const order = calculateOrder({ noodle: 2 }, customMenu);
 
   assert.deepEqual(categoriesFor(customMenu), ["全部", "麵食"]);
   assert.equal(order.total, 110);
